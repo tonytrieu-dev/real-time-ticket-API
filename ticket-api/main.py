@@ -81,6 +81,7 @@ async def get_ticket(ticket_id: int):
 
 @app.put("/tickets/{ticket_id}", response_model=Ticket)
 async def update_ticket(ticket_id: int, title: Optional[str] = None, 
+                       description: Optional[str] = None,
                        status: Optional[TicketStatus] = None,
                        assignee: Optional[str] = None):
     # Find ticket
@@ -90,7 +91,13 @@ async def update_ticket(ticket_id: int, title: Optional[str] = None,
     
     # Update fields if provided
     if title:
+        if len(title) < 1 or len(title) > 100:
+            raise HTTPException(status_code=422, detail="Title must be between 1 and 100 characters")
         ticket.title = title
+    if description:
+        if len(description) < 5 or len(description) > 500:
+            raise HTTPException(status_code=422, detail="Description must be between 5 and 500 characters")
+        ticket.description = description
     if status:
         ticket.status = status
     if assignee is not None:  # Allow empty string to clear assignee
